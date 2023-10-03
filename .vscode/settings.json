@@ -1,0 +1,20 @@
+{
+  "editor.tokenColorCustomizations": {
+    "textMateRules": [
+      {
+        "name": "const",
+        "scope": ["storage.type"],
+        "settings": {
+          "foreground": "#fe1c7a"
+        }
+      },
+      {
+        "name": "methods",
+        "scope": ["entity.name.function"],
+        "settings": {
+          "foreground": "#ae09a3"
+        }
+      }
+    ]
+  }
+}

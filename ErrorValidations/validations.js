@@ -12,3 +12,12 @@ export const registrationValidation = [
   }),
   body("fullName", "Enter your full name").isLength({ min: 3 }),
 ];
+
+export const createNewShopItemValidation = [
+  body("name", "Enter product name").isLength({ min: 3 }).isString(),
+  body("img", "Incorect image").isString(),
+  body("category", "Incorect category").isString().isUppercase(),
+  body("price", "Incorect price").isNumeric(),
+  body("raiting", "Incorect raiting").isNumeric(),
+  body("info", "Incorect info").isLength({ min: 10 }).isString(),
+];

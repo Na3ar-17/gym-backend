@@ -1,11 +1,25 @@
 import pool from "../db.js";
 
 export const getShopItems = async (req, res) => {
+  const { page, pageSize } = req.query;
+  const offset = (page - 1) * pageSize;
   try {
-    const shopItems = await pool.query("SELECT * FROM goods;");
-    res.json(shopItems.rows);
+    const totalItemCountQuery = "SELECT COUNT(*) FROM goods";
+    const totalItemCountResult = await pool.query(totalItemCountQuery);
+    const totalItemCount = parseInt(totalItemCountResult.rows[0].count, 10);
+
+    const shopItemsQuery = "SELECT * FROM goods LIMIT $1 OFFSET $2";
+    const shopItems = await pool.query(shopItemsQuery, [pageSize, offset]);
+
+    const totalPages = Math.ceil(totalItemCount / pageSize);
+
+    res.json({
+      totalPages: totalPages,
+      currentPage: parseInt(page, 10),
+      data: shopItems.rows,
+    });
   } catch (error) {
-    console.error(`Error fetching shopItems: ${error} `);
+    console.error(`Error fetching shopItems: ${error}`);
     res.status(500).json({
       message: "Can't get data",
     });

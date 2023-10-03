@@ -5,32 +5,39 @@ import JWT_SECRET_KEY from "../KEYS.js";
 
 export const registration = async (req, res) => {
   const { fullName, email, password } = req.body;
+
   try {
     const isUserExistQuery = "SELECT * FROM users WHERE email = $1";
     const isUserExist = await pool.query(isUserExistQuery, [email]);
 
     if (isUserExist.rowCount > 0) {
-      return res.json({ message: `User with email: ${email}, already exists` });
+      return res.json({
+        message: `User with email: ${email}, already exists`,
+      });
     } else {
-      const passwordHash = await bcrypt.hash(password, 10);
+      const passwordHash = await bcrypt.hash(password.trim(), 10);
 
       const userInsertQuery =
         "INSERT INTO users (fullName, email ,password) VALUES ($1,$2,$3) RETURNING id";
 
       const user = await pool.query(userInsertQuery, [
-        fullName,
+        fullName.trim(),
         email,
         passwordHash,
       ]);
       const userId = user.rows[0].id;
-
-      const token = jwt.sign({ userId }, JWT_SECRET_KEY, { expiresIn: "30d" });
+      const token = jwt.sign({ userId }, JWT_SECRET_KEY, {
+        expiresIn: "30d",
+      });
 
       const registrationMessage = `Registration successful`;
       return res.status(201).json({
         message: registrationMessage,
-        user: { fullName, email, userId },
+        fullName,
+        email,
+        userId,
         token,
+        id: userId,
       });
     }
   } catch (error) {
