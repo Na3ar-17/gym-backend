@@ -147,7 +147,7 @@ export const getUserGoods = async (req, res) => {
         : [];
 
     if (productIds.length === 0) {
-      res.status(200).json([]); // Return an empty array if no products found
+      res.status(200).json([]);
       return;
     }
 
@@ -209,5 +209,57 @@ export const deleteShopItem = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const editShopCard = async (req, res) => {
+  const { productId } = req.params;
+  const { category, name, price, img, raiting, info } = req.body;
+
+  try {
+    const getProductQuery = "SELECT * FROM goods WHERE id = $1;";
+    const currentProductResult = await pool.query(getProductQuery, [productId]);
+    const currentProduct = currentProductResult.rows[0];
+
+    if (!currentProduct) {
+      return res.status(404).json({ message: "Product not found." });
+    }
+
+    const updatedProduct = {
+      name: name || currentProduct.name,
+      category: category || currentProduct.category,
+      price: price || currentProduct.price,
+      img: img || currentProduct.img,
+      raiting: raiting || currentProduct.raiting,
+      info: info || currentProduct.info,
+    };
+
+    const updateProductQuery = `
+        UPDATE goods
+        SET category = $1, price = $2, name = $3, img = $4, raiting = $5, info = $6
+        WHERE id = $7
+        RETURNING *;`;
+
+    const updatedProductResult = await pool.query(updateProductQuery, [
+      updatedProduct.category,
+      updatedProduct.price,
+      updatedProduct.name,
+      updatedProduct.img,
+      updatedProduct.raiting,
+      updatedProduct.info,
+      productId,
+    ]);
+
+    const finalUpdatedProduct = updatedProductResult.rows[0];
+
+    res.status(200).json({
+      data: finalUpdatedProduct,
+      message: "Product updated successfully",
+    });
+  } catch (error) {
+    console.error("Error updating product:", error);
+    res.status(500).json({
+      message: "Failed to update product",
+    });
   }
 };

@@ -30,6 +30,7 @@ import {
   createAdmin,
   createShopItem,
   deleteShopItem,
+  editShopCard,
   getAdmin,
   getAllUsers,
   getUserData,
@@ -144,6 +145,8 @@ app.post(
 );
 
 app.delete("/shop-item/:productId", checkAdmin, deleteShopItem);
+
+app.patch("/shop-item/:productId", checkAdmin, editShopCard);
 
 try {
   app.listen(PORT, () => {
